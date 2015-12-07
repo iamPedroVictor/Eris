@@ -4,7 +4,7 @@
 
 // Criação do objeto principal do Phaser: Phaser.game
 // parâmetros: largura, altura, tipo de renderização, ID do div
-var game = new Phaser.Game(800, 900, Phaser.AUTO, 'phaser-canvas');
+var game = new Phaser.Game(1200, 900, Phaser.AUTO, 'phaser-canvas');
 
 
 // Adicionando os states do nosso jogos no objeto game
@@ -14,4 +14,4 @@ game.state.add('introState',IntroState);
 
 
 // Iniciando o primeiro state
-game.state.start('gameState');
+game.state.start('introState');
