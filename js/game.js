@@ -2,12 +2,15 @@
 var GameState = {
 
     preload: function(){
-        game.load.image('starfield', "assets/starfield.png");
-        game.load.spritesheet('player',"assets/navespritesheet.png", 399, 928, 12);
-        game.load.spritesheet('asha_hud',"assets/Hud/asha_hud.png", 275, 265, 6);
-        game.load.spritesheet('niko_hud',"assets/Hud/niko_hud.png", 275, 265, 6);
-        game.load.image('bullet',"assets/bala.png");
-        game.load.image('enemy', "assets/sprites/alien2.png");
+        this.game.load.spritesheet('starfield', "assets/fundo.png", 900, 950,4);
+        this.game.load.image('pausePopUp', "assets/Menu/pause.png");
+        this.game.load.spritesheet('player',"assets/navespritesheet.png", 399, 928, 12);
+        this.game.load.image('bullet',"assets/bala.png");
+        this.game.load.spritesheet('enemy', "assets/menor.png", 110, 110, 4);
+        
+        this.game.load.spritesheet('asha_hud',"assets/Hud/asha_hud.png", 275, 265, 6);
+        this.game.load.spritesheet('niko_hud',"assets/Hud/niko_hud.png", 275, 265, 6);
+        this.game.load.image('hudFundo',"assets/Hud/fundo.png");
 
     },
 
@@ -16,6 +19,8 @@ var GameState = {
         this.bulletsTime = 0;
         this.bulletsTime2 = 0;
         
+        this.scorePoint = 0;
+        
         this.playerLifePoint = 5000;
         
         this.verifyDirectionUD = " ";
@@ -23,10 +28,11 @@ var GameState = {
         
         this.spaceField = this.game.add.tileSprite(0,0,1200,950,'starfield');
         
-        this.player = this.game.add.sprite(395, 800,'player');
+        this.player = this.game.add.sprite(500, 700,'player');
         this.player.scale.x = 0.2;
         this.player.scale.y = 0.2;
         this.player.anchor.setTo(0.5, 0.5);
+        game.camera.follow(this.player);
         
         this.game.physics.enable(this.player,Phaser.Physics.ARCADE);
         this.cursors = this.game.input.keyboard.createCursorKeys();
@@ -54,15 +60,29 @@ var GameState = {
         
         this.aliensTimeSP = 1000;
         
-        this.hud = this.game.add.sprite(100, 50,'asha_hud');
-        this.hud.animations.add('5life',[0],6);
-        this.hud.animations.add('4life',[1],6);
-        this.hud.animations.add('3life',[2],6);
-        this.hud.animations.add('2life',[3],6);
-        this.hud.animations.add('1life',[4],6);
-        this.hud.animations.add('0life',[5],6);
-        this.hud.fixedToCamera = true;
-        this.hud.animations.play('5life'); 
+        
+        this.hudFundoA = this.game.add.sprite(160, 680, 'hudFundo');
+        this.hudFundoA.fixedToCamera = true;
+        
+        this.hudAsha = this.game.add.sprite(120, 720,'asha_hud');
+        this.hudAsha.scale.x = 0.7;
+        this.hudAsha.scale.y = 0.7;
+        this.hudAsha.animations.add('5life',[0],6);
+        this.hudAsha.animations.add('4life',[1],6);
+        this.hudAsha.animations.add('3life',[2],6);
+        this.hudAsha.animations.add('2life',[3],6);
+        this.hudAsha.animations.add('1life',[4],6);
+        this.hudAsha.animations.add('0life',[5],6);
+        this.hudAsha.fixedToCamera = true;
+        this.hudAsha.animations.play('5life'); 
+        
+        this.pausePopUp = this.game.add.sprite(600, 475,'pausePopUp');
+        this.pausePopUp.anchor.setTo(0.5,0.5);
+        this.pauseKey = game.input.keyboard.addKey(Phaser.Keyboard.P);
+        this.pauseKey.onDown.add(this.togglePause, this);
+        this.pausePopUp.fixedToCamera = true;
+        this.pause = false;
+        this.game.add.tween(this.pausePopUp).to({ alpha: 0}, 150, Phaser.Easing.Bounce.Out, true);
         
         
         //this.game.time.events.loop(this.timeSpawnAliens, this.createEnemies,this);
@@ -85,7 +105,8 @@ var GameState = {
         
         this.aliens.forEachAlive(function(aliens) {
             this.game.physics.arcade.accelerateToObject(aliens, this.player, 1500, 250, 250);
-            aliens.rotation = -1 * this.game.physics.arcade.angleBetween(aliens, this.player);}, this);
+            aliens.rotation = 0.5 * this.game.physics.arcade.angleBetween(aliens, this.player);
+            aliens.animations.play('alien12');}, this);
 
         
         if(this.cursors.left.isDown){
@@ -205,12 +226,15 @@ var GameState = {
     collisionHandler:function(bullet, veg){
         bullet.kill();
         veg.kill();
-        console.log("Acertou algo");
+        this.scorePoint += 10;
+        console.log(this.scorePoint);
     },
     
     createAliens:function() {
         this.x = game.rnd.integerInRange(100, 800);
         this.alien = this.aliens.create(this.x, 10, 'enemy');
+        this.alien.animations.add('alien12', [0, 1, 2, 3], 6);
+        this.alien.animations.play('alien12');
         this.alien.anchor.setTo(0.5, 0.5);
         this.alien.body.moves = true;
         this.alien.rotation = this.game.physics.arcade.accelerateToXY(this.alien, this.player.x, this.player.y -10, 1000, 250, 250);
@@ -226,16 +250,37 @@ var GameState = {
     
     hudAnimationsControler: function(points,hud){
         if(points > 4000){
-            this.hud.animations.play('5life');
+            this.hudAsha.animations.play('5life');
         }else if(points > 3000 && points < 4000){
-            this.hud.animations.play('4life');
+            this.hudAsha.animations.play('4life');
         }else if(points > 2000 && points < 3000){
-            this.hud.animations.play('3life');
+            this.hudAsha.animations.play('3life');
         }else if(points > 1000 && points < 2000){
-            this.hud.animations.play('1life');
+            this.hudAsha.animations.play('1life');
         }else if(points <= 0){
-            this.hud.animations.play('0life');
+            this.hudAsha.animations.play('0life');
         }
+        
+    },
+    
+    togglePause: function(){
+        if(this.game.paused){
+            this.game.add.tween(this.pausePopUp).to({ alpha: 0}, 150, Phaser.Easing.Bounce.Out, true);
+            //this.game.physics.arcade.isPaused = (this.game.physics.arcade.isPaused) ? false : true;
+            this.hudFundoA.alpha = 1;
+            this.hudAsha.alpha = 1;
+            this.game.paused = false;
+        }else{
+            this.game.add.tween(this.pausePopUp).from( { alpha: 1}, 150, Phaser.Easing.Bounce.Out, true);
+            this.hudFundoA.alpha = 0;
+            this.hudAsha.alpha = 0;            
+           // this.game.physics.arcade.isPaused = (this.game.physics.arcade.isPaused) ? false : true;
+            this.game.paused = true;
+        }
+        
+    },
+    
+    render: function(){
         
     }
 

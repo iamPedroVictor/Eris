@@ -25,7 +25,6 @@ var IntroState = {
         this.spaceField = this.game.add.tileSprite(0,0,1200,950,'MenuBG');
         
         this.game.status = 2;
-        console.log(this.game.status);
         
         this.keyEnter = game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
         this.keyEnter.onDown.add(this.keyEventGameEnter, this);
@@ -70,6 +69,7 @@ var IntroState = {
             this.game.state.start('gameState');
             console.log("GameState");
         }else if(this.game.status == 1){
+            this.game.state.start('aboutState');
             console.log("Creditos");
         }
     },

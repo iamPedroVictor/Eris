@@ -11,6 +11,7 @@ var game = new Phaser.Game(1200, 900, Phaser.AUTO, 'phaser-canvas');
 // Os states já deverão ter sido criados anteriormente
 game.state.add('gameState',GameState);
 game.state.add('introState',IntroState);
+game.state.add('aboutState',aboutStage);
 
 
 // Iniciando o primeiro state
